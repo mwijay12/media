@@ -9,13 +9,39 @@ import {
 } from "react";
 import {
   GoogleAuthProvider,
+  getRedirectResult,
   signInWithPopup,
+  signInWithRedirect,
   signOut,
   onAuthStateChanged,
   type User,
 } from "firebase/auth";
 import { getFirebaseAuth } from "@/lib/firebase";
 import { isFirebaseConfigured } from "@/lib/config";
+
+/** Turn Firebase Auth errors into actionable guidance. */
+function describeAuthError(err: unknown): string | null {
+  const e = err as { code?: string; message?: string };
+  const code = e.code ?? "";
+  if (code === "auth/popup-closed-by-user" || code === "auth/cancelled-popup-request") {
+    return null; // User dismissed — stay silent.
+  }
+  if (code === "auth/operation-not-allowed") {
+    return "Google Sign-In is not enabled yet in your Firebase Console (Authentication > Sign-in method > Google).";
+  }
+  if (code === "auth/unauthorized-domain") {
+    const host =
+      typeof window !== "undefined" ? window.location.hostname : "(this domain)";
+    return `This domain ("${host}") is not authorized. Firebase Console > Authentication > Settings > Authorized domains > Add domain > enter "${host}". (Use "localhost", never 127.0.0.1, for local dev.)`;
+  }
+  if (code === "auth/invalid-api-key" || code.includes("api-key-not-valid")) {
+    return "Firebase rejected the API key. Copy the exact NEXT_PUBLIC_FIREBASE_* values from Firebase Console > Project settings into .env.local (restart dev server) and Vercel env vars (then redeploy).";
+  }
+  if (code === "auth/network-request-failed") {
+    return "Network error reaching Google. Check your connection, VPN, DNS or ad-blocker, then retry.";
+  }
+  return e.message || "Failed to sign in with Google.";
+}
 
 interface AuthContextType {
   user: User | null;
@@ -47,6 +73,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Config is present here (firebaseReady), so getFirebaseAuth() won't throw.
     // Loading resolves through the subscription callbacks below.
     const auth = getFirebaseAuth();
+    // Complete a redirect-based sign-in (fallback flow) if we're returning
+    // from Google. Callbacks below run async, so no render-loop risk.
+    getRedirectResult(auth)
+      .then((credential) => {
+        if (credential?.user) setUser(credential.user);
+      })
+      .catch((err: unknown) => {
+        const code = (err as { code?: string })?.code ?? "";
+        if (code === "auth/redirect-cancelled-by-user") return;
+        console.error("Redirect sign-in error:", err);
+        const message = describeAuthError(err);
+        if (message) setError(message);
+      });
     const unsubscribe = onAuthStateChanged(
       auth,
       (currentUser) => {
@@ -67,24 +106,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const auth = getFirebaseAuth();
       const provider = new GoogleAuthProvider();
       provider.setCustomParameters({ prompt: "select_account" });
-      await signInWithPopup(auth, provider);
+      try {
+        await signInWithPopup(auth, provider);
+      } catch (popupErr: unknown) {
+        const code = (popupErr as { code?: string })?.code ?? "";
+        // Popup unusable here (blocker, extension interference, broken
+        // web storage, flaky network) — fall back to full-page redirect,
+        // which always works. getRedirectResult() above completes it.
+        if (
+          code === "auth/popup-blocked" ||
+          code === "auth/internal-error" ||
+          code === "auth/network-request-failed" ||
+          code === "auth/web-storage-unsupported"
+        ) {
+          await signInWithRedirect(auth, provider);
+          return;
+        }
+        throw popupErr;
+      }
     } catch (err: unknown) {
       console.error("Google sign in error:", err);
-      const e = err as { code?: string; message?: string };
-      if (e.code === "auth/popup-closed-by-user") {
-        return;
-      }
-      if (e.code === "auth/operation-not-allowed") {
-        setError(
-          "Google Sign-In is not enabled yet in your Firebase Console (Authentication > Sign-in method > Google)."
-        );
-      } else if (e.code === "auth/unauthorized-domain") {
-        setError(
-          "This domain is not authorized. Add your domain to Authorized Domains in Firebase Console (Authentication > Settings)."
-        );
-      } else {
-        setError(e.message || "Failed to sign in with Google.");
-      }
+      const message = describeAuthError(err);
+      if (message) setError(message);
     }
   };
 
