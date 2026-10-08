@@ -1,0 +1,15 @@
+rules_version = '2';
+
+// MediaLink Hub — public read + create for the media library.
+// Publish with: firebase deploy --only firestore:rules
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /media_items/{document} {
+      allow read: if true;
+      allow create: if request.resource.data.cloudinaryUrl is string
+        && request.resource.data.title is string
+        && request.resource.data.fileName is string;
+      allow update, delete: if false;
+    }
+  }
+}
