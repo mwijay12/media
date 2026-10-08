@@ -76,11 +76,16 @@ export const getMediaItemById = cache(async (id: string): Promise<MediaItem | nu
 
   const rawProject = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID ?? "";
   const projectId = rawProject.trim().replace(/^["']|["']$/g, "").trim();
-  if (!projectId) return null;
+  const rawKey = process.env.NEXT_PUBLIC_FIREBASE_API_KEY ?? "";
+  const apiKey = rawKey.trim().replace(/^["']|["']$/g, "").trim();
+  if (!projectId || !apiKey) return null;
 
+  // NOTE: the Firestore REST API needs the public API key (?key=...) even
+  // when security rules allow public reads — without it every request fails
+  // and the share page falls through to "not found".
   const url =
     `https://firestore.googleapis.com/v1/projects/${projectId}` +
-    `/databases/(default)/documents/media_items/${id}`;
+    `/databases/(default)/documents/media_items/${id}?key=${encodeURIComponent(apiKey)}`;
 
   try {
     const response = await fetch(url, { cache: "no-store" });

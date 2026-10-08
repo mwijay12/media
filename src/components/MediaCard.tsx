@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { MediaItem } from "@/lib/types";
 import { formatBytes, formatDate, formatDuration, getMediaTypeLabel } from "@/lib/format";
 import { getVideoPosterUrl } from "@/lib/cloudinary";
-import { ImageIcon, MusicIcon, VideoIcon } from "@/components/icons";
+import { EyeIcon, ImageIcon, MusicIcon, VideoIcon } from "@/components/icons";
 
 function Preview({ item }: { item: MediaItem }) {
   const base = "flex h-full w-full items-center justify-center overflow-hidden bg-zinc-100 dark:bg-zinc-800";
@@ -53,15 +53,23 @@ function Preview({ item }: { item: MediaItem }) {
   );
 }
 
-export function MediaCard({ item }: { item: MediaItem }) {
+export function MediaCard({
+  item,
+  onQuickView,
+}: {
+  item: MediaItem;
+  onQuickView?: (item: MediaItem) => void;
+}) {
   const duration = formatDuration(item.duration);
+  const title = item.title || item.fileName;
 
   return (
-    <Link
-      href={`/media/${item.id}`}
-      className="group flex flex-col overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 dark:border-zinc-800 dark:bg-zinc-900"
-    >
-      <div className="relative">
+    <div className="group flex flex-col overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900">
+      <Link
+        href={`/media/${item.id}`}
+        aria-label={`Open ${title}`}
+        className="relative block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-indigo-500"
+      >
         <Preview item={item} />
         <span className="absolute left-2 top-2 inline-flex items-center gap-1 rounded-full bg-black/65 px-2 py-0.5 text-[11px] font-medium text-white backdrop-blur-sm">
           {item.resourceType === "image" ? (
@@ -74,16 +82,28 @@ export function MediaCard({ item }: { item: MediaItem }) {
           {getMediaTypeLabel(item.resourceType)}
           {duration ? ` · ${duration}` : ""}
         </span>
-      </div>
+      </Link>
 
       <div className="flex flex-1 flex-col gap-1 p-3">
-        <p className="truncate text-sm font-semibold text-zinc-900 group-hover:text-indigo-600 dark:text-zinc-100 dark:group-hover:text-indigo-400">
-          {item.title || item.fileName}
-        </p>
+        <Link
+          href={`/media/${item.id}`}
+          className="truncate text-sm font-semibold text-zinc-900 hover:text-indigo-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 dark:text-zinc-100 dark:hover:text-indigo-400"
+        >
+          {title}
+        </Link>
         <p className="text-xs text-zinc-500 dark:text-zinc-400">
           {formatBytes(item.fileSize)} · {formatDate(item.createdAtMs)}
         </p>
+        {onQuickView && (
+          <button
+            type="button"
+            onClick={() => onQuickView(item)}
+            className="mt-1 inline-flex w-fit cursor-pointer items-center gap-1 rounded-md px-1.5 py-1 text-xs font-medium text-zinc-500 transition hover:bg-zinc-100 hover:text-zinc-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-100"
+          >
+            <EyeIcon className="h-3.5 w-3.5" /> Quick view
+          </button>
+        )}
       </div>
-    </Link>
+    </div>
   );
 }

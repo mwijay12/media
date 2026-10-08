@@ -200,7 +200,7 @@ export function UploadZone() {
         className={`flex cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed px-6 py-14 text-center transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 ${
           dragging
             ? "scale-[1.01] border-indigo-500 bg-indigo-500/5"
-            : "border-zinc-300 bg-white hover:border-indigo-400 dark:border-zinc-700 dark:bg-zinc-900 dark:hover:border-indigo-500"
+            : "border-zinc-300 bg-zinc-50 hover:border-indigo-400 dark:border-zinc-700 dark:bg-zinc-900 dark:hover:border-indigo-500"
         }`}
       >
         <UploadIcon className="h-10 w-10 text-zinc-400 dark:text-zinc-500" />

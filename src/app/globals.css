@@ -5,6 +5,7 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  color-scheme: light;
 }
 
 @theme inline {
@@ -14,16 +15,19 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root:not(.light) {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
+/* Dark mode is controlled ONLY by the `.dark` class on <html> (see the
+ * pre-paint script in layout.tsx + ThemeToggle). Do NOT add a
+ * prefers-color-scheme media query here — it would override an explicit
+ * "light" choice on devices whose OS is set to dark, leaving a dark page
+ * background under light-themed components. */
 :root.dark {
   --background: #0a0a0a;
   --foreground: #ededed;
+  color-scheme: dark;
+}
+
+html {
+  background: var(--background);
 }
 
 body {

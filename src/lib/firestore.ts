@@ -1,6 +1,8 @@
 import {
   addDoc,
   collection,
+  doc,
+  getDoc,
   limit,
   onSnapshot,
   orderBy,
@@ -66,6 +68,20 @@ function mapDocument(id: string, data: DocumentData): MediaItem {
 export interface MediaLibraryHandlers {
   next: (items: MediaItem[]) => void;
   error: (message: string) => void;
+}
+
+/**
+ * Client-side single-record fetch (browser SDK). Used as a fallback on the
+ * share page when the server-side REST fetch misses — e.g. API-key HTTP
+ * restrictions that block server IPs, or a record still propagating.
+ * Works for guests too: reads are public per firestore.rules.
+ */
+export async function getMediaItemByIdClient(id: string): Promise<MediaItem | null> {
+  if (!id || !/^[A-Za-z0-9_-]{1,150}$/.test(id)) return null;
+  const db = getFirebaseDb();
+  const snap = await getDoc(doc(db, COLLECTION_NAME, id));
+  if (!snap.exists()) return null;
+  return mapDocument(snap.id, snap.data());
 }
 
 /**

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { MoonIcon, SunIcon } from "@/components/icons";
 
 /**
@@ -12,12 +12,14 @@ import { MoonIcon, SunIcon } from "@/components/icons";
 const STORAGE_KEY = "mlh-theme";
 
 export function ThemeToggle() {
-  const [dark, setDark] = useState<boolean | null>(null);
-
-  // Read the actual class set by the pre-paint script after hydration.
-  useEffect(() => {
-    setDark(document.documentElement.classList.contains("dark"));
-  }, []);
+  // Read the class set by the pre-paint script lazily: on the client this is
+  // correct from the very first render (no effect/flash); on the server we
+  // fall back to null (undecided) until hydration.
+  const [dark, setDark] = useState<boolean | null>(() =>
+    typeof document !== "undefined"
+      ? document.documentElement.classList.contains("dark")
+      : null,
+  );
 
   function toggle() {
     const next = !(dark ?? false);

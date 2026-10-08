@@ -5,6 +5,7 @@ import { subscribeToMediaLibrary } from "@/lib/firestore";
 import { isFirebaseConfigured } from "@/lib/config";
 import type { MediaItem, MediaSort, ResourceType } from "@/lib/types";
 import { MediaCard } from "@/components/MediaCard";
+import { QuickViewModal } from "@/components/QuickViewModal";
 import { AlertIcon, SearchIcon } from "@/components/icons";
 import { inputClass } from "@/components/ui-classes";
 
@@ -26,18 +27,18 @@ const SORTS: { value: MediaSort; label: string }[] = [
 
 export function LibraryGrid() {
   const [items, setItems] = useState<MediaItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const firebaseReady = isFirebaseConfigured();
+  const [loading, setLoading] = useState(firebaseReady);
+  const [error, setError] = useState(
+    firebaseReady ? "" : "Firebase is not configured. Set the NEXT_PUBLIC_FIREBASE_* variables in .env.local.",
+  );
   const [query, setQuery] = useState("");
   const [typeFilter, setTypeFilter] = useState<TypeFilter>("all");
   const [sort, setSort] = useState<MediaSort>("newest");
+  const [preview, setPreview] = useState<MediaItem | null>(null);
 
   useEffect(() => {
-    if (!isFirebaseConfigured()) {
-      setLoading(false);
-      setError("Firebase is not configured. Set the NEXT_PUBLIC_FIREBASE_* variables in .env.local.");
-      return;
-    }
+    if (!firebaseReady) return;
     const unsubscribe = subscribeToMediaLibrary({
       next: (nextItems) => {
         setItems(nextItems);
@@ -49,7 +50,7 @@ export function LibraryGrid() {
       },
     });
     return unsubscribe;
-  }, []);
+  }, [firebaseReady]);
 
   const visible = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -127,7 +128,7 @@ export function LibraryGrid() {
           />
         </div>
         <div className="flex items-center gap-2">
-          <div role="group" aria-label="Filter by type" className="flex rounded-lg border border-zinc-200 p-0.5 dark:border-zinc-700">
+          <div role="group" aria-label="Filter by type" className="flex rounded-lg border border-zinc-200 bg-white p-0.5 shadow-sm dark:border-zinc-700 dark:bg-zinc-900">
             {TYPE_FILTERS.map((f) => (
               <button
                 key={f.value}
@@ -148,7 +149,7 @@ export function LibraryGrid() {
             value={sort}
             onChange={(e) => setSort(e.target.value as MediaSort)}
             aria-label="Sort library"
-            className="rounded-lg border border-zinc-300 bg-white px-2.5 py-2 text-xs font-medium text-zinc-700 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200"
+            className="rounded-lg border border-zinc-300 bg-white px-2.5 py-2 text-xs font-medium text-zinc-700 shadow-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/30 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200"
           >
             {SORTS.map((s) => (
               <option key={s.value} value={s.value}>
@@ -170,10 +171,12 @@ export function LibraryGrid() {
       {visible.length > 0 && (
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
           {visible.map((item) => (
-            <MediaCard key={item.id} item={item} />
+            <MediaCard key={item.id} item={item} onQuickView={setPreview} />
           ))}
         </div>
       )}
+
+      <QuickViewModal item={preview} onClose={() => setPreview(null)} />
     </div>
   );
 }

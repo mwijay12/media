@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
 import { getMediaItemById } from "@/lib/firestore-server";
 import { getSiteUrl } from "@/lib/config";
 import { MediaViewer } from "@/components/MediaViewer";
+import { MediaResolve } from "@/components/MediaResolve";
 import { ChevronLeftIcon } from "@/components/icons";
 
 interface PageProps {
@@ -42,7 +42,25 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 export default async function MediaPage({ params }: PageProps) {
   const { id } = await params;
   const item = await getMediaItemById(id);
-  if (!item) notFound();
+
+  // Server fetch is fastest (SEO/Open Graph). When it misses — e.g. API-key
+  // restrictions or a just-written guest record — <MediaResolve /> retries
+  // from the browser SDK before showing "not found".
+  if (!item) {
+    return (
+      <div className="flex flex-col gap-6">
+        <nav aria-label="Back">
+          <Link
+            href="/library"
+            className="inline-flex items-center gap-1 text-sm font-medium text-zinc-500 transition hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
+          >
+            <ChevronLeftIcon className="h-4 w-4" /> Back to library
+          </Link>
+        </nav>
+        <MediaResolve id={id} />
+      </div>
+    );
+  }
 
   const shareUrl = `${getSiteUrl()}/media/${item.id}`;
 

@@ -37,34 +37,29 @@ const AuthContext = createContext<AuthContextType>({
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+  const firebaseReady = isFirebaseConfigured();
+  const [loading, setLoading] = useState(firebaseReady);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!isFirebaseConfigured()) {
-      setLoading(false);
-      return;
-    }
+    if (!firebaseReady) return;
 
-    try {
-      const auth = getFirebaseAuth();
-      const unsubscribe = onAuthStateChanged(
-        auth,
-        (currentUser) => {
-          setUser(currentUser);
-          setLoading(false);
-        },
-        (err) => {
-          console.error("Auth state error:", err);
-          setLoading(false);
-        }
-      );
-      return () => unsubscribe();
-    } catch (e) {
-      console.warn("Could not initialize Firebase Auth:", e);
-      setLoading(false);
-    }
-  }, []);
+    // Config is present here (firebaseReady), so getFirebaseAuth() won't throw.
+    // Loading resolves through the subscription callbacks below.
+    const auth = getFirebaseAuth();
+    const unsubscribe = onAuthStateChanged(
+      auth,
+      (currentUser) => {
+        setUser(currentUser);
+        setLoading(false);
+      },
+      (err) => {
+        console.error("Auth state error:", err);
+        setLoading(false);
+      }
+    );
+    return () => unsubscribe();
+  }, [firebaseReady]);
 
   const signInWithGoogle = async () => {
     setError(null);
