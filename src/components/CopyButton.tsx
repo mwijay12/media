@@ -4,7 +4,15 @@ import { useState } from "react";
 import { CheckIcon, CopyIcon } from "@/components/icons";
 import { btnSecondary } from "@/components/ui-classes";
 
-export function CopyButton({ text, label = "Copy" }: { text: string; label?: string }) {
+export function CopyButton({
+  text,
+  label = "Copy",
+  className,
+}: {
+  text: string;
+  label?: string;
+  className?: string;
+}) {
   const [copied, setCopied] = useState(false);
 
   async function copy() {
@@ -18,7 +26,7 @@ export function CopyButton({ text, label = "Copy" }: { text: string; label?: str
   }
 
   return (
-    <button type="button" onClick={copy} className={btnSecondary}>
+    <button type="button" onClick={copy} className={className ?? btnSecondary}>
       {copied ? <CheckIcon className="h-4 w-4" /> : <CopyIcon className="h-4 w-4" />}
       {copied ? "Copied" : label}
     </button>

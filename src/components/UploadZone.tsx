@@ -12,6 +12,7 @@ import { saveMediaItem } from "@/lib/firestore";
 import { formatBytes } from "@/lib/format";
 import { AlertIcon, CheckIcon, CopyIcon, UploadIcon } from "@/components/icons";
 import { btnPrimary, inputClass, labelClass } from "@/components/ui-classes";
+import { useAuth } from "@/context/AuthContext";
 
 type Status = "idle" | "uploading" | "done" | "error";
 
@@ -21,6 +22,7 @@ type Status = "idle" | "uploading" | "done" | "error";
  * → persist metadata in Firestore → show the shareable /media/[id] link.
  */
 export function UploadZone() {
+  const { user } = useAuth();
   const [file, setFile] = useState<File | null>(null);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -101,6 +103,9 @@ export function UploadZone() {
         width: result.width,
         height: result.height,
         duration: result.duration,
+        userId: user?.uid,
+        userEmail: user?.email || undefined,
+        userName: user?.displayName || undefined,
       });
 
       setCloudinaryUrl(result.secureUrl);
@@ -135,7 +140,7 @@ export function UploadZone() {
         </p>
 
         <div className="flex flex-col gap-1.5">
-          <span className={labelClass}>Shareable page</span>
+          <span className={labelClass}>Shareable page (with Open Graph tags for AI &amp; Social previews)</span>
           <div className="flex items-center gap-2">
             <input readOnly value={shareUrl} className={`${inputClass} font-mono text-xs`} />
             <button type="button" onClick={() => copy(shareUrl, "share")} className={btnPrimary}>
@@ -152,7 +157,7 @@ export function UploadZone() {
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <span className={labelClass}>Direct file URL</span>
+          <span className={labelClass}>Direct Cloudinary file URL</span>
           <div className="flex items-center gap-2">
             <input readOnly value={cloudinaryUrl} className={`${inputClass} font-mono text-xs`} />
             <button type="button" onClick={() => copy(cloudinaryUrl, "direct")} className={btnPrimary}>
@@ -198,23 +203,23 @@ export function UploadZone() {
             : "border-zinc-300 bg-white hover:border-indigo-400 dark:border-zinc-700 dark:bg-zinc-900 dark:hover:border-indigo-500"
         }`}
       >
-        <UploadIcon className="mb-3 h-9 w-9 text-zinc-400 dark:text-zinc-500" />
+        <UploadIcon className="h-10 w-10 text-zinc-400 dark:text-zinc-500" />
         {file ? (
-          <>
-            <p className="break-all font-medium text-zinc-900 dark:text-zinc-100">{file.name}</p>
-            <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+          <div className="mt-3 flex flex-col items-center gap-1">
+            <p className="font-medium text-zinc-900 dark:text-zinc-100">{file.name}</p>
+            <p className="text-xs text-zinc-500 dark:text-zinc-400">
               {formatBytes(file.size)} · {getResourceTypeForFile(file)}
             </p>
-          </>
+          </div>
         ) : (
-          <>
+          <div className="mt-3 flex flex-col items-center gap-1">
             <p className="font-medium text-zinc-900 dark:text-zinc-100">
-              Drag &amp; drop a file, or click to browse
+              Drag &amp; drop your media here, or <span className="text-indigo-500">browse</span>
             </p>
-            <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-              Images, video and audio · up to {MAX_FILE_SIZE_BYTES / (1024 * 1024)} MB
+            <p className="text-xs text-zinc-500 dark:text-zinc-400">
+              Images (JPG, PNG, WebP, GIF), Videos (MP4, MOV, WebM), Audio (MP3, WAV, OGG) up to 100 MB
             </p>
-          </>
+          </div>
         )}
         <input
           ref={inputRef}
@@ -226,14 +231,15 @@ export function UploadZone() {
       </div>
 
       {file && (
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-3 rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
           <div>
             <label htmlFor="upload-title" className={labelClass}>
               Title
             </label>
             <input
               id="upload-title"
-              placeholder="Title (optional — defaults to the file name)"
+              type="text"
+              placeholder="Title (optional)"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               disabled={busy}
@@ -273,6 +279,17 @@ export function UploadZone() {
               <p className="text-center text-xs text-zinc-500 dark:text-zinc-400">{statusText}</p>
             </div>
           )}
+
+          <div className="flex items-center justify-between text-xs text-zinc-500 dark:text-zinc-400">
+            {user ? (
+              <span className="flex items-center gap-1.5 font-medium text-emerald-600 dark:text-emerald-400">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                Uploading as {user.displayName || user.email}
+              </span>
+            ) : (
+              <span>Uploading as guest</span>
+            )}
+          </div>
 
           <div className="flex items-center gap-3">
             <button type="button" onClick={upload} disabled={busy} className={btnPrimary}>

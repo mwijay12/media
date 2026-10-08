@@ -30,7 +30,7 @@ function readNumber(fields: FirestoreFields | undefined, key: string): number | 
 
 function readTimestampMs(fields: FirestoreFields | undefined, key: string): number | undefined {
   const timestamp = fields?.[key]?.timestampValue;
-  if (typeof timestamp !== "string") return undefined;
+  if (!timestamp || typeof timestamp !== "string") return undefined;
   const ms = Date.parse(timestamp);
   return Number.isFinite(ms) ? ms : undefined;
 }
@@ -56,6 +56,9 @@ function mapRestDocument(name: string, fields: FirestoreFields): MediaItem | nul
     width: readNumber(fields, "width"),
     height: readNumber(fields, "height"),
     duration: readNumber(fields, "duration"),
+    userId: readString(fields, "userId") || undefined,
+    userEmail: readString(fields, "userEmail") || undefined,
+    userName: readString(fields, "userName") || undefined,
     createdAtMs: readTimestampMs(fields, "createdAt"),
   };
 }
@@ -71,7 +74,10 @@ export const getMediaItemById = cache(async (id: string): Promise<MediaItem | nu
     return null;
   }
 
-  const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID!.trim();
+  const rawProject = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID ?? "";
+  const projectId = rawProject.trim().replace(/^["']|["']$/g, "").trim();
+  if (!projectId) return null;
+
   const url =
     `https://firestore.googleapis.com/v1/projects/${projectId}` +
     `/databases/(default)/documents/media_items/${id}`;

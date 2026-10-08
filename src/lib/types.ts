@@ -22,6 +22,10 @@ export interface MediaItem {
   height?: number;
   /** Duration in seconds (video/audio only). */
   duration?: number;
+  /** Optional authenticated uploader metadata */
+  userId?: string;
+  userEmail?: string;
+  userName?: string;
   /** Creation time as epoch milliseconds (client-friendly form of the
    *  Firestore `createdAt` Timestamp). */
   createdAtMs?: number;
@@ -39,6 +43,9 @@ export interface NewMediaItem {
   width?: number;
   height?: number;
   duration?: number;
+  userId?: string;
+  userEmail?: string;
+  userName?: string;
 }
 
 /** Sort options for the library grid. */

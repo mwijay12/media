@@ -27,6 +27,9 @@ export async function saveMediaItem(input: NewMediaItem): Promise<string> {
     description: input.description,
     fileName: input.fileName,
     fileSize: input.fileSize,
+    ...(input.userId ? { userId: input.userId } : {}),
+    ...(input.userEmail ? { userEmail: input.userEmail } : {}),
+    ...(input.userName ? { userName: input.userName } : {}),
     ...(input.format ? { format: input.format } : {}),
     ...(typeof input.width === "number" ? { width: input.width } : {}),
     ...(typeof input.height === "number" ? { height: input.height } : {}),
@@ -53,6 +56,9 @@ function mapDocument(id: string, data: DocumentData): MediaItem {
     width: typeof data.width === "number" ? data.width : undefined,
     height: typeof data.height === "number" ? data.height : undefined,
     duration: typeof data.duration === "number" ? data.duration : undefined,
+    userId: typeof data.userId === "string" ? data.userId : undefined,
+    userEmail: typeof data.userEmail === "string" ? data.userEmail : undefined,
+    userName: typeof data.userName === "string" ? data.userName : undefined,
     createdAtMs: typeof createdAt?.toMillis === "function" ? createdAt.toMillis() : undefined,
   };
 }

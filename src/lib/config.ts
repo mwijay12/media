@@ -1,10 +1,10 @@
 /**
  * Central place for reading public environment configuration.
  *
- * Only NEXT_PUBLIC_* variables are read here, so this module is safe to import
- * from client components AND server components. The Cloudinary API secret is
- * intentionally never referenced anywhere in this app — uploads use an
- * UNSIGNED upload preset.
+ * NOTE: In Next.js client bundles, environment variables MUST be accessed
+ * statically (e.g. process.env.NEXT_PUBLIC_...) so that the bundler can
+ * inline their values at build time. Dynamic lookup like process.env[name]
+ * returns undefined in the browser!
  */
 
 export class ConfigError extends Error {
@@ -14,10 +14,11 @@ export class ConfigError extends Error {
   }
 }
 
-/** Reads a trimmed env var, returning undefined when empty. */
-function env(name: string): string | undefined {
-  const value = process.env[name]?.trim();
-  return value ? value : undefined;
+/** Trims value and strips any accidental surrounding quotes (e.g. "Mwijay Personal"). */
+function clean(value: string | undefined): string | undefined {
+  if (!value) return undefined;
+  const trimmed = value.trim().replace(/^["']|["']$/g, "").trim();
+  return trimmed || undefined;
 }
 
 export interface CloudinaryConfig {
@@ -27,18 +28,21 @@ export interface CloudinaryConfig {
 
 /** Throws a descriptive error when Cloudinary env vars are missing. */
 export function getCloudinaryConfig(): CloudinaryConfig {
-  const cloudName = env("NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME");
-  const uploadPreset = env("NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET");
+  const cloudName = clean(process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME);
+  const uploadPreset = clean(process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET);
   if (!cloudName || !uploadPreset) {
     throw new ConfigError(
-      "Cloudinary is not configured. Set NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME and NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET in .env.local (see README).",
+      "Cloudinary is not configured. Set NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME and NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET in your environment variables.",
     );
   }
   return { cloudName, uploadPreset };
 }
 
 export function isCloudinaryConfigured(): boolean {
-  return Boolean(env("NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME") && env("NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET"));
+  return Boolean(
+    clean(process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME) &&
+    clean(process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET)
+  );
 }
 
 export interface FirebaseConfig {
@@ -53,28 +57,30 @@ export interface FirebaseConfig {
 
 /** Throws a descriptive error when Firebase env vars are missing. */
 export function getFirebaseConfig(): FirebaseConfig {
-  const apiKey = env("NEXT_PUBLIC_FIREBASE_API_KEY");
-  const projectId = env("NEXT_PUBLIC_FIREBASE_PROJECT_ID");
-  const appId = env("NEXT_PUBLIC_FIREBASE_APP_ID");
+  const apiKey = clean(process.env.NEXT_PUBLIC_FIREBASE_API_KEY);
+  const projectId = clean(process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID);
+  const appId = clean(process.env.NEXT_PUBLIC_FIREBASE_APP_ID);
   if (!apiKey || !projectId || !appId) {
     throw new ConfigError(
-      "Firebase is not configured. Set the NEXT_PUBLIC_FIREBASE_* variables in .env.local (see README).",
+      "Firebase is not configured. Set the NEXT_PUBLIC_FIREBASE_* variables in your environment variables.",
     );
   }
   return {
     apiKey,
     projectId,
     appId,
-    authDomain: env("NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN") ?? `${projectId}.firebaseapp.com`,
-    storageBucket: env("NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET") ?? `${projectId}.appspot.com`,
-    messagingSenderId: env("NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID") ?? "",
-    measurementId: env("NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID"),
+    authDomain: clean(process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN) ?? `${projectId}.firebaseapp.com`,
+    storageBucket: clean(process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET) ?? `${projectId}.appspot.com`,
+    messagingSenderId: clean(process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID) ?? "",
+    measurementId: clean(process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID),
   };
 }
 
 export function isFirebaseConfigured(): boolean {
   return Boolean(
-    env("NEXT_PUBLIC_FIREBASE_API_KEY") && env("NEXT_PUBLIC_FIREBASE_PROJECT_ID") && env("NEXT_PUBLIC_FIREBASE_APP_ID"),
+    clean(process.env.NEXT_PUBLIC_FIREBASE_API_KEY) &&
+    clean(process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID) &&
+    clean(process.env.NEXT_PUBLIC_FIREBASE_APP_ID)
   );
 }
 
@@ -83,9 +89,9 @@ export function isFirebaseConfigured(): boolean {
  * Priority: NEXT_PUBLIC_SITE_URL → Vercel production URL → localhost.
  */
 export function getSiteUrl(): string {
-  const explicit = env("NEXT_PUBLIC_SITE_URL");
+  const explicit = clean(process.env.NEXT_PUBLIC_SITE_URL);
   if (explicit) return explicit.replace(/\/+$/, "");
-  const vercelUrl = env("VERCEL_PROJECT_PRODUCTION_URL") ?? env("VERCEL_URL");
+  const vercelUrl = clean(process.env.VERCEL_PROJECT_PRODUCTION_URL) ?? clean(process.env.VERCEL_URL);
   if (vercelUrl) return `https://${vercelUrl.replace(/\/+$/, "")}`;
   return "http://localhost:3000";
 }

@@ -79,6 +79,7 @@ export function MediaViewer({ item, shareUrl }: { item: MediaItem; shareUrl: str
               ["Dimensions", dimensions ?? "—"],
               ["Duration", duration ?? "—"],
               ["Uploaded", formatDate(item.createdAtMs)],
+              ["Uploader", item.userName || item.userEmail || "Guest"],
             ] as const
           ).map(([label, value]) => (
             <div key={label} className="flex flex-col gap-0.5">
@@ -100,9 +101,7 @@ export function MediaViewer({ item, shareUrl }: { item: MediaItem; shareUrl: str
             <code className="w-full truncate rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 font-mono text-xs text-zinc-700 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200">
               {shareUrl}
             </code>
-            <a href="/library" className={btnPrimary}>
-              Browse library
-            </a>
+            <CopyButton text={shareUrl} label="Copy" className={btnPrimary} />
           </div>
         </div>
       </div>
