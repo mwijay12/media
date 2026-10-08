@@ -11,7 +11,8 @@ import {
 import { saveMediaItem } from "@/lib/firestore";
 import { formatBytes } from "@/lib/format";
 import { AlertIcon, CheckIcon, CopyIcon, UploadIcon } from "@/components/icons";
-import { btnPrimary, inputClass, labelClass } from "@/components/ui-classes";
+import { Button, LiquidButton } from "@/components/ui/liquid-glass-button";
+import { inputClass, labelClass } from "@/components/ui-classes";
 import { useAuth } from "@/context/AuthContext";
 
 type Status = "idle" | "uploading" | "done" | "error";
@@ -141,35 +142,42 @@ export function UploadZone() {
 
         <div className="flex flex-col gap-1.5">
           <span className={labelClass}>Shareable page (with Open Graph tags for AI &amp; Social previews)</span>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
             <input readOnly value={shareUrl} className={`${inputClass} font-mono text-xs`} />
-            <button type="button" onClick={() => copy(shareUrl, "share")} className={btnPrimary}>
+            <LiquidButton
+              type="button"
+              size="sm"
+              onClick={() => copy(shareUrl, "share")}
+              className="w-full sm:w-auto"
+            >
               {copied === "share" ? <CheckIcon className="h-4 w-4" /> : <CopyIcon className="h-4 w-4" />}
               {copied === "share" ? "Copied" : "Copy"}
-            </button>
+            </LiquidButton>
           </div>
-          <Link
-            href={`/media/${mediaId}`}
-            className="text-sm font-medium text-indigo-600 hover:underline dark:text-indigo-400"
-          >
-            Open your media page →
-          </Link>
+          <Button variant="cool" size="sm" asChild className="mt-1 w-fit">
+            <Link href={`/media/${mediaId}`}>Open your media page →</Link>
+          </Button>
         </div>
 
         <div className="flex flex-col gap-1.5">
           <span className={labelClass}>Direct Cloudinary file URL</span>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
             <input readOnly value={cloudinaryUrl} className={`${inputClass} font-mono text-xs`} />
-            <button type="button" onClick={() => copy(cloudinaryUrl, "direct")} className={btnPrimary}>
+            <LiquidButton
+              type="button"
+              size="sm"
+              onClick={() => copy(cloudinaryUrl, "direct")}
+              className="w-full sm:w-auto"
+            >
               {copied === "direct" ? <CheckIcon className="h-4 w-4" /> : <CopyIcon className="h-4 w-4" />}
               {copied === "direct" ? "Copied" : "Copy"}
-            </button>
+            </LiquidButton>
           </div>
         </div>
 
-        <button type="button" onClick={reset} className={`${btnPrimary} self-start`}>
+        <LiquidButton type="button" size="default" onClick={reset} className="self-start">
           <UploadIcon className="h-4 w-4" /> Upload another file
-        </button>
+        </LiquidButton>
       </div>
     );
   }
@@ -197,7 +205,7 @@ export function UploadZone() {
           setDragging(false);
           if (!busy) pick(e.dataTransfer.files[0]);
         }}
-        className={`flex cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed px-6 py-14 text-center transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 ${
+        className={`flex cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed px-4 py-10 text-center transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 sm:px-6 sm:py-14 ${
           dragging
             ? "scale-[1.01] border-indigo-500 bg-indigo-500/5"
             : "border-zinc-300 bg-zinc-50 hover:border-indigo-400 dark:border-zinc-700 dark:bg-zinc-900 dark:hover:border-indigo-500"
@@ -292,10 +300,10 @@ export function UploadZone() {
           </div>
 
           <div className="flex items-center gap-3">
-            <button type="button" onClick={upload} disabled={busy} className={btnPrimary}>
+            <LiquidButton type="button" size="lg" onClick={upload} disabled={busy} className="w-full sm:w-auto">
               <UploadIcon className="h-4 w-4" />
               {busy ? statusText || "Processing…" : "Upload"}
-            </button>
+            </LiquidButton>
             {!busy && (
               <button
                 type="button"

@@ -5,7 +5,8 @@ import Link from "next/link";
 import type { MediaItem } from "@/lib/types";
 import { formatBytes, formatDate, formatDuration } from "@/lib/format";
 import { ExternalIcon, MusicIcon, XIcon } from "@/components/icons";
-import { btnPrimary, btnSecondary } from "@/components/ui-classes";
+import { Button } from "@/components/ui/liquid-glass-button";
+import { btnSecondary } from "@/components/ui-classes";
 import { CopyButton } from "@/components/CopyButton";
 
 /**
@@ -121,9 +122,11 @@ export function QuickViewModal({
             </dl>
 
             <div className="flex flex-wrap items-center gap-2">
-              <Link href={`/media/${item.id}`} className={btnPrimary}>
-                <ExternalIcon className="h-4 w-4" /> Open full page
-              </Link>
+              <Button variant="cool" size="sm" asChild>
+                <Link href={`/media/${item.id}`}>
+                  <ExternalIcon className="h-4 w-4" /> Open full page
+                </Link>
+              </Button>
               {shareUrl && <CopyButton text={shareUrl} label="Copy link" />}
               <button type="button" onClick={onClose} className={btnSecondary}>
                 Close

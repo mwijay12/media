@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { CheckIcon, CopyIcon } from "@/components/icons";
-import { btnSecondary } from "@/components/ui-classes";
+import { LiquidButton } from "@/components/ui/liquid-glass-button";
 
 export function CopyButton({
   text,
@@ -25,10 +25,24 @@ export function CopyButton({
     }
   }
 
-  return (
-    <button type="button" onClick={copy} className={className ?? btnSecondary}>
+  const content = (
+    <>
       {copied ? <CheckIcon className="h-4 w-4" /> : <CopyIcon className="h-4 w-4" />}
       {copied ? "Copied" : label}
-    </button>
+    </>
+  );
+
+  if (className) {
+    return (
+      <button type="button" onClick={copy} className={className}>
+        {content}
+      </button>
+    );
+  }
+
+  return (
+    <LiquidButton type="button" size="sm" onClick={copy}>
+      {content}
+    </LiquidButton>
   );
 }

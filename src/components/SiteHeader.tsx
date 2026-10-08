@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { LiquidButton } from "@/components/ui/liquid-glass-button";
 import { LinkIcon } from "@/components/icons";
 import { useAuth } from "@/context/AuthContext";
 import { useState } from "react";
@@ -26,18 +27,18 @@ export function SiteHeader() {
   return (
     <>
       <header className="sticky top-0 z-40 border-b border-zinc-200/80 bg-white/80 backdrop-blur-md dark:border-zinc-800/80 dark:bg-zinc-950/75">
-        <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between gap-3 px-4 sm:px-6">
+        <div className="mx-auto flex min-h-16 w-full max-w-6xl flex-wrap items-center justify-between gap-x-3 gap-y-2 px-4 py-2 sm:px-6">
           <Link
             href="/"
             className="flex items-center gap-2.5 text-sm font-semibold tracking-tight text-zinc-900 transition-opacity hover:opacity-80 dark:text-zinc-100"
           >
             <span
               aria-hidden
-              className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500 to-violet-600 text-white shadow-md shadow-indigo-500/25"
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500 to-violet-600 text-white shadow-md shadow-indigo-500/25"
             >
               <LinkIcon className="h-4 w-4" />
             </span>
-            MediaLink Hub
+            <span className="hidden min-[400px]:inline">MediaLink Hub</span>
           </Link>
 
           <nav aria-label="Primary" className="flex items-center gap-2">
@@ -48,7 +49,7 @@ export function SiteHeader() {
                   key={link.href}
                   href={link.href}
                   aria-current={active ? "page" : undefined}
-                  className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 ${
+                  className={`rounded-lg px-2 py-1.5 text-[13px] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 sm:px-3 sm:text-sm ${
                     active
                       ? "bg-zinc-900 text-white dark:bg-white dark:text-zinc-900"
                       : "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-100"
@@ -71,7 +72,7 @@ export function SiteHeader() {
                     <img
                       src={user.photoURL}
                       alt={user.displayName || "User avatar"}
-                      className="h-7 w-7 rounded-full border border-zinc-200 object-cover dark:border-zinc-700"
+                      className="h-7 w-7 rounded-full border border-zinc-200 object-cover shadow-sm ring-2 ring-indigo-500/30 dark:border-zinc-700"
                     />
                   ) : (
                     <div className="flex h-7 w-7 items-center justify-center rounded-full bg-indigo-500/10 text-xs font-semibold text-indigo-600 dark:text-indigo-400">
@@ -90,10 +91,11 @@ export function SiteHeader() {
                   </button>
                 </div>
               ) : (
-                <button
+                <LiquidButton
+                  size="sm"
                   onClick={handleSignIn}
                   disabled={signingIn}
-                  className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-zinc-200 bg-white px-2.5 py-1.5 text-xs font-medium text-zinc-800 shadow-sm transition hover:border-zinc-300 hover:bg-zinc-50 active:scale-95 disabled:opacity-50 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800"
+                  aria-label="Sign in with Google"
                 >
                   <svg width="14" height="14" viewBox="0 0 24 24" className="shrink-0">
                     <path
@@ -113,8 +115,8 @@ export function SiteHeader() {
                       d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
                     />
                   </svg>
-                  <span>{signingIn ? "Signing in…" : "Sign in"}</span>
-                </button>
+                  <span className="hidden min-[480px]:inline">{signingIn ? "Signing in…" : "Sign in"}</span>
+                </LiquidButton>
               )}
             </div>
           </nav>

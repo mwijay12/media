@@ -2,7 +2,7 @@ import type { MediaItem } from "@/lib/types";
 import { formatBytes, formatDate, formatDuration, getMediaTypeLabel } from "@/lib/format";
 import { getVideoPosterUrl } from "@/lib/cloudinary";
 import { ExternalIcon, MusicIcon, UploadIcon } from "@/components/icons";
-import { btnPrimary, btnSecondary } from "@/components/ui-classes";
+import { btnSecondary } from "@/components/ui-classes";
 import { CopyButton } from "@/components/CopyButton";
 
 /**
@@ -50,7 +50,7 @@ export function MediaViewer({ item, shareUrl }: { item: MediaItem; shareUrl: str
             {getMediaTypeLabel(item.resourceType)}
             {duration ? ` · ${duration}` : ""}
           </p>
-          <h1 className="mt-1 text-2xl font-bold tracking-tight text-zinc-900 sm:text-3xl dark:text-zinc-50">
+          <h1 className="mt-1 text-xl font-bold tracking-tight text-zinc-900 min-[400px]:text-2xl sm:text-3xl dark:text-zinc-50">
             {item.title || item.fileName}
           </h1>
           {item.description && (
@@ -101,7 +101,7 @@ export function MediaViewer({ item, shareUrl }: { item: MediaItem; shareUrl: str
             <code className="w-full truncate rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 font-mono text-xs text-zinc-700 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200">
               {shareUrl}
             </code>
-            <CopyButton text={shareUrl} label="Copy" className={btnPrimary} />
+            <CopyButton text={shareUrl} label="Copy" />
           </div>
         </div>
       </div>

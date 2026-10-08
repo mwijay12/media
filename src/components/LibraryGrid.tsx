@@ -85,7 +85,7 @@ export function LibraryGrid() {
 
   if (loading) {
     return (
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4" aria-label="Loading library">
+      <div className="grid grid-cols-1 gap-4 min-[480px]:grid-cols-2 sm:grid-cols-3 lg:grid-cols-4" aria-label="Loading library">
         {Array.from({ length: 8 }).map((_, i) => (
           <div
             key={i}
@@ -127,7 +127,7 @@ export function LibraryGrid() {
             className={`${inputClass} pl-9`}
           />
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <div role="group" aria-label="Filter by type" className="flex rounded-lg border border-zinc-200 bg-white p-0.5 shadow-sm dark:border-zinc-700 dark:bg-zinc-900">
             {TYPE_FILTERS.map((f) => (
               <button
@@ -149,7 +149,7 @@ export function LibraryGrid() {
             value={sort}
             onChange={(e) => setSort(e.target.value as MediaSort)}
             aria-label="Sort library"
-            className="rounded-lg border border-zinc-300 bg-white px-2.5 py-2 text-xs font-medium text-zinc-700 shadow-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/30 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200"
+            className="w-full rounded-lg border border-zinc-300 bg-white px-2.5 py-2 text-xs font-medium text-zinc-700 shadow-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/30 min-[420px]:w-auto dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200"
           >
             {SORTS.map((s) => (
               <option key={s.value} value={s.value}>
@@ -169,7 +169,7 @@ export function LibraryGrid() {
       </p>
 
       {visible.length > 0 && (
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-4 min-[480px]:grid-cols-2 sm:grid-cols-3 lg:grid-cols-4">
           {visible.map((item) => (
             <MediaCard key={item.id} item={item} onQuickView={setPreview} />
           ))}

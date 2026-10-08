@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { UploadZone } from "@/components/UploadZone";
+import { Button } from "@/components/ui/liquid-glass-button";
 import { GlobeIcon, LinkIcon, ZapIcon } from "@/components/icons";
 
 export const metadata: Metadata = {
@@ -35,24 +36,21 @@ export default function HomePage() {
           <p className="inline-flex w-fit items-center gap-1.5 rounded-full border border-indigo-500/30 bg-indigo-500/10 px-3 py-1 text-xs font-semibold text-indigo-600 dark:text-indigo-400">
             <ZapIcon className="h-3.5 w-3.5" /> Free · No login · Instant links
           </p>
-          <h1 className="text-4xl font-bold leading-[1.05] tracking-tight text-zinc-900 sm:text-5xl dark:text-zinc-50">
+          <h1 className="text-3xl font-bold leading-[1.05] tracking-tight text-zinc-900 min-[420px]:text-4xl sm:text-5xl dark:text-zinc-50">
             Upload media.
             <br />
             <span className="bg-gradient-to-r from-indigo-500 to-violet-500 bg-clip-text text-transparent">
               Get a shareable link.
             </span>
           </h1>
-          <p className="max-w-xl text-lg text-zinc-600 dark:text-zinc-300">
+          <p className="max-w-xl text-base text-zinc-600 sm:text-lg dark:text-zinc-300">
             Drop an image, video or audio file and instantly get a page people can
             open, preview and download — powered by Cloudinary &amp; Firebase.
           </p>
           <div className="flex flex-wrap items-center gap-3 text-sm">
-            <Link
-              href="/library"
-              className="inline-flex items-center justify-center gap-2 rounded-lg border border-zinc-200 bg-white px-4 py-2 font-medium text-zinc-700 shadow-sm transition hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800"
-            >
-              Browse the library →
-            </Link>
+            <Button variant="cool" asChild>
+              <Link href="/library">Browse the library →</Link>
+            </Button>
             <span className="text-zinc-500 dark:text-zinc-400">
               JPG · PNG · WebP · GIF · MP4 · MOV · WebM · MP3 · WAV · OGG
             </span>
